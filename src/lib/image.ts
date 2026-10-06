@@ -1,0 +1,29 @@
+/** Downscale a photo to keep uploads small. Falls back to the original file. */
+export async function shrinkImage(file: File, maxSide = 1600): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    bitmap.close()
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.85)
+    )
+    return blob ?? file
+  } catch {
+    return file
+  }
+}
+
+export function currentPosition(timeout = 6000): Promise<GeolocationCoordinates | null> {
+  if (!("geolocation" in navigator)) return Promise.resolve(null)
+  return new Promise((resolve) =>
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(pos.coords),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout, maximumAge: 60_000 }
+    )
+  )
+}
