@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { SEASON_CHIPS, type Season } from "@/lib/season"
 import type { Fragment } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -13,21 +14,21 @@ function hash(s: string): number {
 // Shorter fragments read like keywords, so they get the biggest type.
 function sizeClass(text: string): string {
   const n = text.length
-  if (n <= 4) return "text-4xl font-semibold"
-  if (n <= 10) return "text-3xl font-medium"
-  if (n <= 20) return "text-xl"
-  if (n <= 40) return "text-base"
-  return "text-sm"
+  if (n <= 4) return "rounded-2xl px-4 py-2 text-3xl font-semibold"
+  if (n <= 10) return "rounded-2xl px-3.5 py-2 text-2xl font-medium"
+  if (n <= 20) return "rounded-xl px-3 py-1.5 text-lg font-medium"
+  if (n <= 40) return "rounded-xl px-3 py-1.5 text-base"
+  return "rounded-xl px-3 py-2 text-sm leading-snug"
 }
-
-const TONES = ["text-foreground", "text-foreground/80", "text-primary", "text-foreground/65"]
 
 export function FragmentCloud({
   fragments,
+  season,
   selectedId,
   onSelect,
 }: {
   fragments: Fragment[]
+  season: Season
   selectedId: string | null
   onSelect: (id: string) => void
 }) {
@@ -41,9 +42,11 @@ export function FragmentCloud({
     [fragments]
   )
 
+  const chips = SEASON_CHIPS[season]
+
   return (
-    <div className="flex min-h-64 flex-wrap content-center items-center justify-center gap-x-5 gap-y-3 px-2 py-6">
-      {items.map(({ f, h }) => {
+    <div className="flex min-h-64 flex-wrap content-center items-center justify-center gap-x-3 gap-y-3.5 px-1 py-6">
+      {items.map(({ f, h }, i) => {
         const rotate = ((h % 9) - 4) * 0.8
         const selected = f.id === selectedId
         return (
@@ -53,19 +56,29 @@ export function FragmentCloud({
             onClick={() => onSelect(f.id)}
             style={{ rotate: `${rotate}deg` }}
             className={cn(
-              "max-w-full rounded-lg px-1 text-center leading-tight transition-all hover:scale-105",
-              selected && "bg-accent ring-2 ring-ring/40"
+              "max-w-full rounded-2xl text-center leading-tight transition-transform duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97]",
+              selected && "-translate-y-0.5 scale-105 rounded-2xl shadow-lg ring-2 ring-white"
             )}
           >
             {f.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL
-              <img
-                src={f.image_url}
-                alt={f.content ?? "사진"}
-                className={cn("rounded-xl object-cover shadow-sm", h % 2 ? "size-20" : "size-28")}
-              />
+              // Polaroid-style frame so photos sit in the cloud like the chips do.
+              <span className="block rounded-xl bg-white p-1.5 pb-3 shadow-md ring-1 ring-black/5">
+                {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
+                <img
+                  src={f.image_url}
+                  alt={f.content ?? "사진"}
+                  className={cn("rounded-lg object-cover", h % 2 ? "size-20" : "size-28")}
+                />
+              </span>
             ) : (
-              <span className={cn("block max-w-72 break-keep", sizeClass(f.content ?? ""), TONES[h % TONES.length])}>
+              <span
+                className={cn(
+                  "block max-w-72 break-keep shadow-sm ring-1 ring-black/5",
+                  sizeClass(f.content ?? ""),
+                  // Color by position so neighbors never share a tint.
+                  chips[i % chips.length]
+                )}
+              >
                 {f.content}
               </span>
             )}

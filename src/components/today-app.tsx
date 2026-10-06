@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner"
 import { deleteFragment, listFragments, logout, translateFragment } from "@/app/actions"
 import { formatDay, hasKorean, shiftDay, toDay } from "@/lib/day"
+import { SEASON_LABEL, seasonOf } from "@/lib/season"
 import type { Fragment } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ import { FragmentCard } from "@/components/fragment-card"
 import { FragmentCloud } from "@/components/fragment-cloud"
 import { FragmentComposer } from "@/components/fragment-composer"
 import { FragmentTimeline } from "@/components/fragment-timeline"
+import { SeasonBackground } from "@/components/season-background"
 
 // Leaflet touches `window` on import.
 const FragmentMap = dynamic(() => import("@/components/fragment-map"), {
@@ -49,6 +51,7 @@ export function TodayApp() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [tab, setTab] = useState("fragments")
   const isToday = day === toDay()
+  const season = seasonOf(day)
 
   useEffect(() => {
     let cancelled = false
@@ -96,6 +99,7 @@ export function TodayApp() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 pt-6 pb-16">
+      <SeasonBackground season={season} />
       <header className="mb-5 flex items-center gap-1">
         <Button variant="ghost" size="icon" onClick={() => setDay((d) => shiftDay(d, -1))} aria-label="전날">
           <ChevronLeftIcon />
@@ -107,7 +111,9 @@ export function TodayApp() {
           title="오늘로 이동"
         >
           {formatDay(day)}
-          {isToday && <span className="ml-2 text-sm font-normal text-muted-foreground">오늘</span>}
+          <span className="ml-2 text-sm font-normal text-foreground/60">
+            {isToday ? `오늘 · ${SEASON_LABEL[season]}` : SEASON_LABEL[season]}
+          </span>
         </button>
         <Button
           variant="ghost"
@@ -132,7 +138,11 @@ export function TodayApp() {
         </Button>
       </header>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(String(v))}
+        className="rounded-3xl bg-background/70 p-3 shadow-lg ring-1 ring-white/60 backdrop-blur-xl sm:p-5"
+      >
         <TabsList className="w-full">
           <TabsTrigger value="fragments">그날의 파편</TabsTrigger>
           <TabsTrigger value="summary">하루 정리</TabsTrigger>
@@ -173,6 +183,7 @@ export function TodayApp() {
           ) : view === "cloud" ? (
             <>
               <FragmentCloud
+                season={season}
                 fragments={fragments}
                 selectedId={selectedId}
                 onSelect={(id) => setSelectedId((cur) => (cur === id ? null : id))}

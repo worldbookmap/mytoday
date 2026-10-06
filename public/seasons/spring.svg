@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#fbe3ec"/><stop offset="0.55" stop-color="#fff6f1"/><stop offset="1" stop-color="#f1f6e4"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.82" cy="0.12" r="0.55">
+  <stop offset="0" stop-color="#fff" stop-opacity="0.95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<path id="petal" d="M0 -11 C 7 -11 10 -3 6 5 C 4 9 0 11 0 11 C 0 11 -4 9 -6 5 C -10 -3 -7 -11 0 -11 Z"/><g id="flower"><ellipse cx="0" cy="-11" rx="8" ry="11" transform="rotate(0)"/><ellipse cx="0" cy="-11" rx="8" ry="11" transform="rotate(72)"/><ellipse cx="0" cy="-11" rx="8" ry="11" transform="rotate(144)"/><ellipse cx="0" cy="-11" rx="8" ry="11" transform="rotate(216)"/><ellipse cx="0" cy="-11" rx="8" ry="11" transform="rotate(288)"/><circle r="4" fill="#e07a98"/></g></defs>
+<rect width="1440" height="900" fill="url(#sky)"/>
+<rect width="1440" height="900" fill="url(#glow)"/>
+<path d="M0 700 C 240 630 430 690 660 655 C 900 620 1120 690 1440 630 L1440 900 L0 900Z" fill="#e4efd0"/>
+<path d="M0 790 C 300 735 540 805 800 770 C 1060 735 1250 790 1440 755 L1440 900 L0 900Z" fill="#d3e6b9"/>
+<g fill="none" stroke="#8b5e52" stroke-linecap="round"><path d="M-30 70 C 120 90 250 120 430 190" stroke-width="12"/><path d="M170 100 C 210 150 230 200 220 260" stroke-width="7"/><path d="M300 135 C 350 120 400 95 450 60" stroke-width="6"/><path d="M1470 120 C 1350 130 1250 170 1120 250" stroke-width="10"/><path d="M1300 145 C 1280 200 1290 240 1310 280" stroke-width="6"/></g>
+<use href="#flower" fill="#f7b6c8" transform="translate(56 78) rotate(32) scale(0.87)"/>
+<use href="#flower" fill="#fbd0dc" transform="translate(114 81) rotate(60) scale(1.16)"/>
+<use href="#flower" fill="#f7b6c8" transform="translate(193 103) rotate(58) scale(1.04)"/>
+<use href="#flower" fill="#f7b6c8" transform="translate(256 116) rotate(2) scale(1.13)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(333 159) rotate(52) scale(1.10)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(407 176) rotate(25) scale(1.09)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(447 204) rotate(30) scale(1.17)"/>
+<use href="#flower" fill="#f7b6c8" transform="translate(210 180) rotate(62) scale(1.30)"/>
+<use href="#flower" fill="#f4a3bb" transform="translate(231 244) rotate(36) scale(0.87)"/>
+<use href="#flower" fill="#fbd0dc" transform="translate(212 264) rotate(64) scale(1.33)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(351 109) rotate(17) scale(1.27)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(423 75) rotate(64) scale(1.24)"/>
+<use href="#flower" fill="#f4a3bb" transform="translate(448 61) rotate(8) scale(1.23)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(1418 127) rotate(34) scale(0.89)"/>
+<use href="#flower" fill="#fde2ea" transform="translate(1362 123) rotate(16) scale(0.97)"/>
+<use href="#flower" fill="#fbd0dc" transform="translate(1291 157) rotate(17) scale(0.81)"/>
+<use href="#flower" fill="#f4a3bb" transform="translate(1219 180) rotate(39) scale(1.08)"/>
+<use href="#flower" fill="#f7b6c8" transform="translate(1158 232) rotate(69) scale(1.33)"/>
+<use href="#flower" fill="#fbd0dc" transform="translate(1120 253) rotate(31) scale(1.32)"/>
+<use href="#flower" fill="#f4a3bb" transform="translate(1296 199) rotate(36) scale(0.83)"/>
+<use href="#flower" fill="#f4a3bb" transform="translate(1307 260) rotate(39) scale(1.07)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.83" transform="translate(1377 845) rotate(20) scale(0.49)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.90" transform="translate(228 449) rotate(142) scale(0.84)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.47" transform="translate(1367 536) rotate(160) scale(0.59)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.85" transform="translate(40 476) rotate(115) scale(0.65)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.90" transform="translate(34 369) rotate(49) scale(0.73)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.86" transform="translate(971 259) rotate(287) scale(0.85)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.88" transform="translate(1099 724) rotate(127) scale(0.99)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.69" transform="translate(232 697) rotate(257) scale(0.70)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.66" transform="translate(1197 391) rotate(318) scale(0.94)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.59" transform="translate(1007 247) rotate(97) scale(0.95)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.74" transform="translate(1379 660) rotate(182) scale(0.73)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.54" transform="translate(109 748) rotate(261) scale(0.95)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.55" transform="translate(1072 165) rotate(235) scale(0.59)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.56" transform="translate(1261 201) rotate(188) scale(0.92)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.46" transform="translate(303 794) rotate(152) scale(0.84)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.46" transform="translate(119 850) rotate(9) scale(0.85)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.76" transform="translate(368 742) rotate(57) scale(0.54)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.60" transform="translate(555 153) rotate(55) scale(0.46)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.84" transform="translate(1103 686) rotate(325) scale(0.86)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.64" transform="translate(207 854) rotate(93) scale(0.78)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.47" transform="translate(26 547) rotate(51) scale(0.47)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.89" transform="translate(232 193) rotate(229) scale(0.72)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.56" transform="translate(1345 881) rotate(84) scale(0.69)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.64" transform="translate(851 597) rotate(255) scale(0.58)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.55" transform="translate(347 196) rotate(65) scale(0.57)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.65" transform="translate(924 283) rotate(347) scale(0.85)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.86" transform="translate(135 734) rotate(132) scale(0.73)"/>
+<use href="#petal" fill="#f4a3bb" opacity="0.76" transform="translate(879 342) rotate(134) scale(0.45)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.46" transform="translate(146 354) rotate(303) scale(0.82)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.62" transform="translate(300 570) rotate(27) scale(0.60)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.71" transform="translate(1347 179) rotate(272) scale(0.55)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.50" transform="translate(564 474) rotate(142) scale(0.51)"/>
+<use href="#petal" fill="#f7b6c8" opacity="0.76" transform="translate(116 770) rotate(231) scale(0.98)"/>
+<use href="#petal" fill="#f9c7d5" opacity="0.67" transform="translate(36 624) rotate(280) scale(0.85)"/>
+</svg>
