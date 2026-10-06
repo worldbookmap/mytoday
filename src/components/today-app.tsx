@@ -19,6 +19,7 @@ import type { Fragment } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DayArchive } from "@/components/day-archive"
 import { DaySummary } from "@/components/day-summary"
 import { FragmentCard } from "@/components/fragment-card"
 import { FragmentCloud } from "@/components/fragment-cloud"
@@ -53,6 +54,7 @@ export function TodayApp({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<View>("cloud")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [tab, setTab] = useState("fragments")
   const isToday = day === toDay()
 
   useEffect(() => {
@@ -148,10 +150,11 @@ export function TodayApp({ userId }: { userId: string }) {
         </Button>
       </header>
 
-      <Tabs defaultValue="fragments">
+      <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
         <TabsList className="w-full">
           <TabsTrigger value="fragments">그날의 파편</TabsTrigger>
           <TabsTrigger value="summary">하루 정리</TabsTrigger>
+          <TabsTrigger value="archive">지난 기록</TabsTrigger>
         </TabsList>
 
         <TabsContent value="fragments" className="space-y-4 pt-3">
@@ -207,6 +210,15 @@ export function TodayApp({ userId }: { userId: string }) {
 
         <TabsContent value="summary" className="pt-3">
           <DaySummary key={day} userId={userId} day={day} fragments={fragments} />
+        </TabsContent>
+
+        <TabsContent value="archive" className="pt-3">
+          <DayArchive
+            onOpen={(d) => {
+              setDay(d)
+              setTab("summary")
+            }}
+          />
         </TabsContent>
       </Tabs>
     </main>
