@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Loader2Icon, SearchIcon } from "lucide-react"
 import { toast } from "sonner"
-import { supabase } from "@/lib/supabase"
+import { listArchive } from "@/app/actions"
 import { formatDay } from "@/lib/day"
 import type { DayEntry } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
@@ -26,20 +26,16 @@ export function DayArchive({ onOpen }: { onOpen: (day: string) => void }) {
   const [query, setQuery] = useState("")
 
   useEffect(() => {
-    Promise.all([
-      supabase.from("days").select("*"),
-      supabase.from("fragments").select("day"),
-    ]).then(([days, fragments]) => {
-      const error = days.error ?? fragments.error
-      if (error) toast.error(error.message)
+    listArchive().then(({ data, error }) => {
+      if (error !== undefined) toast.error(error)
 
       const byDay = new Map<string, ArchiveItem>()
       const item = (day: string) => {
         if (!byDay.has(day)) byDay.set(day, { day, entry: null, fragmentCount: 0 })
         return byDay.get(day)!
       }
-      for (const f of (fragments.data ?? []) as { day: string }[]) item(f.day).fragmentCount++
-      for (const e of (days.data ?? []) as DayEntry[]) item(e.day).entry = e
+      for (const d of data?.fragmentDays ?? []) item(d).fragmentCount++
+      for (const e of data?.days ?? []) item(e.day).entry = e
 
       setItems([...byDay.values()].sort((a, b) => b.day.localeCompare(a.day)))
     })

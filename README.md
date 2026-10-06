@@ -14,9 +14,14 @@ Next.js 16 · Supabase (Auth, Postgres, Storage) · shadcn/ui · Tailwind CSS ·
 ## 설정
 
 1. Supabase 프로젝트를 만들고 SQL Editor에서 `supabase/schema.sql` 실행
-2. Supabase → Authentication → URL Configuration 에 사이트 URL 추가 (`http://localhost:3000`, Vercel 도메인)
-3. `.env.example` 을 `.env.local` 로 복사해서 값 채우기
-4. `npm install && npm run dev`
+   (예전 이메일 로그인 버전 스키마를 이미 실행했다면 `supabase/migrations/002_passcode.sql` 실행)
+2. `.env.example` 을 `.env.local` 로 복사해서 값 채우기
+3. `npm install && npm run dev`
+
+### 접근 보호
+
+이메일 로그인 대신 비밀번호 하나(`APP_PASSCODE`)로 잠가요. 한 번 입력하면 그 기기에서 1년간 유지되고,
+비밀번호를 바꾸면 모든 기기가 다시 잠겨요. 데이터는 서버에서만 `SUPABASE_SECRET_KEY` 로 읽고 써요.
 
 ### 번역
 
@@ -25,4 +30,4 @@ Next.js 16 · Supabase (Auth, Postgres, Storage) · shadcn/ui · Tailwind CSS ·
 
 ### 배포 (Vercel)
 
-GitHub 저장소를 Vercel에 연결하고 위 환경 변수 3개를 Project Settings → Environment Variables 에 추가.
+GitHub 저장소를 Vercel에 연결하고 `.env.example` 의 환경 변수들을 Project Settings → Environment Variables 에 추가.

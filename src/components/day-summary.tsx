@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react"
 import { CheckIcon, LanguagesIcon, Loader2Icon } from "lucide-react"
 import { toast } from "sonner"
-import { supabase } from "@/lib/supabase"
-import { translateToEnglish } from "@/lib/translate"
-import type { DayEntry, Fragment, SpeakingAttempt } from "@/lib/types"
+import { getDay, saveDay, translateText } from "@/app/actions"
+import type { Fragment, SpeakingAttempt } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,11 +16,9 @@ type SaveState = "idle" | "saving" | "saved" | "error"
 
 /** Remount per day (key={day}) so state starts fresh. */
 export function DaySummary({
-  userId,
   day,
   fragments,
 }: {
-  userId: string
   day: string
   fragments: Fragment[]
 }) {
@@ -36,20 +33,14 @@ export function DaySummary({
   const [translating, setTranslating] = useState(false)
 
   useEffect(() => {
-    supabase
-      .from("days")
-      .select("*")
-      .eq("day", day)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) toast.error(error.message)
-        const entry = data as DayEntry | null
-        setTitle(entry?.title ?? "")
-        setBody(entry?.body ?? "")
-        setBodyEn(entry?.body_en ?? "")
-        setSpeaking(entry?.speaking ?? [])
-        setLoaded(true)
-      })
+    getDay(day).then(({ data: entry, error }) => {
+      if (error !== undefined) toast.error(error)
+      setTitle(entry?.title ?? "")
+      setBody(entry?.body ?? "")
+      setBodyEn(entry?.body_en ?? "")
+      setSpeaking(entry?.speaking ?? [])
+      setLoaded(true)
+    })
   }, [day])
 
   // Autosave shortly after the last edit.
@@ -58,25 +49,23 @@ export function DaySummary({
     const t = setTimeout(async () => {
       setSaveState("saving")
       setDirty(false)
-      const { error } = await supabase.from("days").upsert({
-        user_id: userId,
+      const { error } = await saveDay({
         day,
         title: title || null,
         body: body || null,
         body_en: bodyEn || null,
         speaking,
-        updated_at: new Date().toISOString(),
       })
-      if (error) {
+      if (error !== undefined) {
         // Not re-marking dirty avoids a retry loop; the next edit retries.
         setSaveState("error")
-        toast.error(`저장하지 못했어요: ${error.message}`)
+        toast.error(`저장하지 못했어요: ${error}`)
       } else {
         setSaveState("saved")
       }
     }, 1200)
     return () => clearTimeout(t)
-  }, [dirty, userId, day, title, body, bodyEn, speaking])
+  }, [dirty, day, title, body, bodyEn, speaking])
 
   function edit<T>(setter: (v: T) => void) {
     return (v: T) => {
@@ -88,13 +77,10 @@ export function DaySummary({
   async function translateBody() {
     if (!body.trim()) return
     setTranslating(true)
-    try {
-      setReference(await translateToEnglish(body))
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "번역하지 못했어요")
-    } finally {
-      setTranslating(false)
-    }
+    const { data, error } = await translateText(body)
+    if (error !== undefined) toast.error(error)
+    else setReference(data)
+    setTranslating(false)
   }
 
   if (!loaded) {

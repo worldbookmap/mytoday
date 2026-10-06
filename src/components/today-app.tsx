@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -12,9 +13,8 @@ import {
   MapIcon,
 } from "lucide-react"
 import { toast } from "sonner"
-import { supabase, PHOTO_BUCKET } from "@/lib/supabase"
+import { deleteFragment, listFragments, logout, translateFragment } from "@/app/actions"
 import { formatDay, hasKorean, shiftDay, toDay } from "@/lib/day"
-import { translateToEnglish } from "@/lib/translate"
 import type { Fragment } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -40,15 +40,8 @@ const VIEWS: { id: View; label: string; Icon: typeof CloudIcon }[] = [
   { id: "map", label: "지도", Icon: MapIcon },
 ]
 
-async function withImageUrls(fragments: Fragment[]): Promise<Fragment[]> {
-  const paths = fragments.flatMap((f) => (f.image_path ? [f.image_path] : []))
-  if (paths.length === 0) return fragments
-  const { data } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, 60 * 60)
-  const urls = new Map(data?.map((d) => [d.path, d.signedUrl]))
-  return fragments.map((f) => (f.image_path ? { ...f, image_url: urls.get(f.image_path) ?? undefined } : f))
-}
-
-export function TodayApp({ userId }: { userId: string }) {
+export function TodayApp() {
+  const router = useRouter()
   const [day, setDay] = useState(() => toDay())
   const [fragments, setFragments] = useState<Fragment[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,19 +55,12 @@ export function TodayApp({ userId }: { userId: string }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reset while the new day loads
     setLoading(true)
     setSelectedId(null)
-    supabase
-      .from("fragments")
-      .select("*")
-      .eq("day", day)
-      .order("created_at")
-      .then(async ({ data, error }) => {
-        if (cancelled) return
-        if (error) toast.error(error.message)
-        const rows = await withImageUrls((data ?? []) as Fragment[])
-        if (cancelled) return
-        setFragments(rows)
-        setLoading(false)
-      })
+    listFragments(day).then(({ data, error }) => {
+      if (cancelled) return
+      if (error !== undefined) toast.error(error)
+      setFragments(data ?? [])
+      setLoading(false)
+    })
     return () => {
       cancelled = true
     }
@@ -82,19 +68,13 @@ export function TodayApp({ userId }: { userId: string }) {
 
   const translate = useCallback(async (fragment: Fragment) => {
     if (!hasKorean(fragment.content)) return
-    try {
-      const en = await translateToEnglish(fragment.content!)
-      const { error } = await supabase.from("fragments").update({ content_en: en }).eq("id", fragment.id)
-      if (error) throw error
-      setFragments((prev) => prev.map((f) => (f.id === fragment.id ? { ...f, content_en: en } : f)))
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "번역하지 못했어요")
-    }
+    const { data: en, error } = await translateFragment(fragment.id)
+    if (error !== undefined) return toast.error(error)
+    setFragments((prev) => prev.map((f) => (f.id === fragment.id ? { ...f, content_en: en } : f)))
   }, [])
 
-  async function handleSaved(fragment: Fragment) {
-    const [withUrl] = await withImageUrls([fragment])
-    setFragments((prev) => [...prev, withUrl])
+  function handleSaved(fragment: Fragment) {
+    setFragments((prev) => [...prev, fragment])
     translate(fragment)
   }
 
@@ -103,9 +83,8 @@ export function TodayApp({ userId }: { userId: string }) {
       action: {
         label: "삭제",
         onClick: async () => {
-          const { error } = await supabase.from("fragments").delete().eq("id", fragment.id)
-          if (error) return toast.error(error.message)
-          if (fragment.image_path) await supabase.storage.from(PHOTO_BUCKET).remove([fragment.image_path])
+          const { error } = await deleteFragment(fragment.id)
+          if (error !== undefined) return toast.error(error)
           setFragments((prev) => prev.filter((f) => f.id !== fragment.id))
           setSelectedId((id) => (id === fragment.id ? null : id))
         },
@@ -143,8 +122,11 @@ export function TodayApp({ userId }: { userId: string }) {
           variant="ghost"
           size="icon"
           className="ml-auto"
-          onClick={() => supabase.auth.signOut()}
-          aria-label="로그아웃"
+          onClick={async () => {
+            await logout()
+            router.refresh()
+          }}
+          aria-label="잠그기"
         >
           <LogOutIcon />
         </Button>
@@ -158,7 +140,7 @@ export function TodayApp({ userId }: { userId: string }) {
         </TabsList>
 
         <TabsContent value="fragments" className="space-y-4 pt-3">
-          <FragmentComposer userId={userId} day={day} onSaved={handleSaved} />
+          <FragmentComposer day={day} onSaved={handleSaved} />
 
           <div className="flex items-center justify-between">
             <h2 className="text-sm text-muted-foreground">
@@ -209,7 +191,7 @@ export function TodayApp({ userId }: { userId: string }) {
         </TabsContent>
 
         <TabsContent value="summary" className="pt-3">
-          <DaySummary key={day} userId={userId} day={day} fragments={fragments} />
+          <DaySummary key={day} day={day} fragments={fragments} />
         </TabsContent>
 
         <TabsContent value="archive" className="pt-3">

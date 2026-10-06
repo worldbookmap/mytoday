@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { ImagePlusIcon, Loader2Icon, MapPinIcon, MapPinOffIcon, SendIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
+import { createFragment, createPhotoUpload } from "@/app/actions"
 import { supabase, PHOTO_BUCKET } from "@/lib/supabase"
 import { currentPosition, shrinkImage } from "@/lib/image"
 import type { Fragment } from "@/lib/types"
@@ -10,11 +11,9 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
 export function FragmentComposer({
-  userId,
   day,
   onSaved,
 }: {
-  userId: string
   day: string
   onSaved: (fragment: Fragment) => void
 }) {
@@ -38,23 +37,19 @@ export function FragmentComposer({
     try {
       const [coords, imagePath] = await Promise.all([
         withLocation ? currentPosition() : Promise.resolve(null),
-        photo ? uploadPhoto(userId, photo) : Promise.resolve(null),
+        photo ? uploadPhoto(photo) : Promise.resolve(null),
       ])
-      const { data, error } = await supabase
-        .from("fragments")
-        .insert({
-          day,
-          content: content || null,
-          image_path: imagePath,
-          lat: coords?.latitude ?? null,
-          lng: coords?.longitude ?? null,
-        })
-        .select()
-        .single()
-      if (error) throw error
+      const { data, error } = await createFragment({
+        day,
+        content: content || null,
+        image_path: imagePath,
+        lat: coords?.latitude ?? null,
+        lng: coords?.longitude ?? null,
+      })
+      if (error !== undefined) throw new Error(error)
       setText("")
       pickPhoto(null)
-      onSaved(data as Fragment)
+      onSaved(data)
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "저장하지 못했어요")
     } finally {
@@ -121,13 +116,14 @@ export function FragmentComposer({
   )
 }
 
-async function uploadPhoto(userId: string, file: File): Promise<string> {
+async function uploadPhoto(file: File): Promise<string> {
   const blob = await shrinkImage(file)
   const ext = blob.type === "image/jpeg" ? "jpg" : (file.name.split(".").pop() ?? "img")
-  const path = `${userId}/${crypto.randomUUID()}.${ext}`
+  const signed = await createPhotoUpload(ext)
+  if (signed.error !== undefined) throw new Error(signed.error)
   const { error } = await supabase.storage
     .from(PHOTO_BUCKET)
-    .upload(path, blob, { contentType: blob.type || file.type })
+    .uploadToSignedUrl(signed.data.path, signed.data.token, blob, { contentType: blob.type || file.type })
   if (error) throw error
-  return path
+  return signed.data.path
 }

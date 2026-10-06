@@ -1,5 +1,3 @@
-import { createClient } from "@supabase/supabase-js"
-
 const MAX_CHARS = 5000
 
 async function deepl(text: string, key: string): Promise<string> {
@@ -42,29 +40,14 @@ async function myMemory(text: string): Promise<string> {
   return out.join("\n")
 }
 
-export async function POST(request: Request) {
-  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "")
-  if (!token) return Response.json({ error: "로그인이 필요해요" }, { status: 401 })
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  )
-  const { data, error } = await supabase.auth.getUser(token)
-  if (error || !data.user) return Response.json({ error: "로그인이 필요해요" }, { status: 401 })
-
-  const { text } = (await request.json()) as { text?: string }
-  if (!text?.trim()) return Response.json({ error: "번역할 내용이 없어요" }, { status: 400 })
-  if (text.length > MAX_CHARS) {
-    return Response.json({ error: `${MAX_CHARS}자 이하만 번역할 수 있어요` }, { status: 400 })
-  }
-
+/** Korean → English. Uses DeepL when DEEPL_API_KEY is set, otherwise MyMemory. */
+export async function translateKoToEn(text: string): Promise<string> {
+  if (text.length > MAX_CHARS) throw new Error(`${MAX_CHARS}자 이하만 번역할 수 있어요`)
+  const key = process.env.DEEPL_API_KEY
   try {
-    const key = process.env.DEEPL_API_KEY
-    const translated = key ? await deepl(text, key) : await myMemory(text)
-    return Response.json({ text: translated })
+    return key ? await deepl(text, key) : await myMemory(text)
   } catch (e) {
     console.error("translate failed", e)
-    return Response.json({ error: "번역 서비스에 연결하지 못했어요" }, { status: 502 })
+    throw new Error("번역 서비스에 연결하지 못했어요")
   }
 }
