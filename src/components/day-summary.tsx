@@ -8,6 +8,7 @@ import type { Fragment, SpeakingAttempt } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { FragmentMap } from "@/components/fragment-map-lazy"
 import { Textarea } from "@/components/ui/textarea"
 import { SpeakingPractice } from "@/components/speaking-practice"
 import { TranslationReveal } from "@/components/translation-reveal"
@@ -87,6 +88,7 @@ export function DaySummary({
     return <Loader2Icon className="mx-auto my-16 animate-spin text-muted-foreground" />
   }
 
+  const hasPlaces = fragments.some((f) => f.lat != null && f.lng != null)
   const words = bodyEn.trim() ? bodyEn.trim().split(/\s+/).length : 0
 
   return (
@@ -118,6 +120,18 @@ export function DaySummary({
                   </li>
                 ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasPlaces && (
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>그날의 장소</CardTitle>
+            <CardDescription>점을 누르면 그곳에서 남긴 파편이 보여요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FragmentMap fragments={fragments} />
           </CardContent>
         </Card>
       )}
