@@ -173,3 +173,17 @@ export async function listArchive() {
     }
   })
 }
+
+/** Every fragment with a location, across all days, for the archive map. */
+export async function listLocatedFragments() {
+  return guarded(async () => {
+    const { data, error } = await db
+      .from("fragments")
+      .select("*")
+      .not("lat", "is", null)
+      .not("lng", "is", null)
+      .order("created_at")
+    if (error) throw error
+    return withImageUrls(data as Fragment[])
+  })
+}

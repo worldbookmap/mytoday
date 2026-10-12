@@ -1,13 +1,16 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Loader2Icon, SearchIcon } from "lucide-react"
+import { ListIcon, Loader2Icon, MapIcon, SearchIcon } from "lucide-react"
 import { toast } from "sonner"
-import { listArchive } from "@/app/actions"
+import { listArchive, listLocatedFragments } from "@/app/actions"
 import { formatDay } from "@/lib/day"
-import type { DayEntry } from "@/lib/types"
+import type { DayEntry, Fragment } from "@/lib/types"
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { FragmentMap } from "@/components/fragment-map-lazy"
 
 type ArchiveItem = {
   day: string
@@ -24,6 +27,8 @@ function yearMonth(day: string): string {
 export function DayArchive({ onOpen }: { onOpen: (day: string) => void }) {
   const [items, setItems] = useState<ArchiveItem[] | null>(null)
   const [query, setQuery] = useState("")
+  const [view, setView] = useState<"list" | "map">("list")
+  const [located, setLocated] = useState<Fragment[] | null>(null)
 
   useEffect(() => {
     listArchive().then(({ data, error }) => {
@@ -41,6 +46,15 @@ export function DayArchive({ onOpen }: { onOpen: (day: string) => void }) {
     })
   }, [])
 
+  // Loaded on first switch to the map; signed photo URLs make it the heavier query.
+  useEffect(() => {
+    if (view !== "map" || located) return
+    listLocatedFragments().then(({ data, error }) => {
+      if (error !== undefined) toast.error(error)
+      setLocated(data ?? [])
+    })
+  }, [view, located])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!items || !q) return items
@@ -48,6 +62,16 @@ export function DayArchive({ onOpen }: { onOpen: (day: string) => void }) {
       [entry?.title, entry?.body, entry?.body_en].some((t) => t?.toLowerCase().includes(q))
     )
   }, [items, query])
+
+  // A fragment matches by its own text or by its day's summary.
+  const filteredLocated = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!located || !q) return located
+    const days = new Set(filtered?.map((i) => i.day))
+    return located.filter(
+      (f) => days.has(f.day) || [f.content, f.content_en].some((t) => t?.toLowerCase().includes(q))
+    )
+  }, [located, filtered, query])
 
   if (!filtered) {
     return <Loader2Icon className="mx-auto my-16 animate-spin text-muted-foreground" />
@@ -61,23 +85,55 @@ export function DayArchive({ onOpen }: { onOpen: (day: string) => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="relative">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="제목, 일기, 영어 글에서 찾기"
-          className="h-10 pl-9 text-base"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={view === "map" ? "파편, 일기, 영어 글에서 찾기" : "제목, 일기, 영어 글에서 찾기"}
+            className="h-10 pl-9 text-base"
+          />
+        </div>
+        <div className="flex gap-0.5 rounded-lg bg-muted p-0.5">
+          {(
+            [
+              { id: "list", label: "목록", Icon: ListIcon },
+              { id: "map", label: "지도", Icon: MapIcon },
+            ] as const
+          ).map(({ id, label, Icon }) => (
+            <Button
+              key={id}
+              variant="ghost"
+              size="icon-sm"
+              aria-label={label}
+              aria-pressed={view === id}
+              title={label}
+              onClick={() => setView(id)}
+              className={cn(view === id && "bg-background shadow-xs hover:bg-background")}
+            >
+              <Icon />
+            </Button>
+          ))}
+        </div>
       </div>
 
-      {filtered.length === 0 && (
+      {view === "map" &&
+        (!filteredLocated ? (
+          <Loader2Icon className="mx-auto my-16 animate-spin text-muted-foreground" />
+        ) : query && filteredLocated.length === 0 ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">찾는 파편이 없어요.</p>
+        ) : (
+          <FragmentMap fragments={filteredLocated} onOpenDay={onOpen} />
+        ))}
+
+      {view === "list" && filtered.length === 0 && (
         <p className="py-16 text-center text-sm text-muted-foreground">
           {query ? "찾는 글이 없어요." : "아직 남긴 기록이 없어요."}
         </p>
       )}
 
-      {[...groups].map(([month, list]) => (
+      {view === "list" && [...groups].map(([month, list]) => (
         <section key={month} className="space-y-2">
           <h2 className="text-sm font-medium text-muted-foreground">{month}</h2>
           <ul className="space-y-2">

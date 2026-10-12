@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import {
   ChevronLeftIcon,
@@ -25,14 +24,9 @@ import { DaySummary } from "@/components/day-summary"
 import { FragmentCard } from "@/components/fragment-card"
 import { FragmentCloud } from "@/components/fragment-cloud"
 import { FragmentComposer } from "@/components/fragment-composer"
+import { FragmentMap } from "@/components/fragment-map-lazy"
 import { FragmentTimeline } from "@/components/fragment-timeline"
 import { SeasonBackground } from "@/components/season-background"
-
-// Leaflet touches `window` on import.
-const FragmentMap = dynamic(() => import("@/components/fragment-map"), {
-  ssr: false,
-  loading: () => <div className="h-[420px] animate-pulse rounded-2xl bg-muted" />,
-})
 
 type View = "cloud" | "timeline" | "map"
 
